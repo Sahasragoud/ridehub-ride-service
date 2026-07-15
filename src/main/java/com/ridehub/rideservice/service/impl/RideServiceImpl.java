@@ -15,6 +15,7 @@ import com.ridehub.rideservice.exception.ResourceNotFoundException;
 import com.ridehub.rideservice.fare.FareBreakdown;
 import com.ridehub.rideservice.fare.dto.FareBreakdownResponse;
 import com.ridehub.rideservice.fare.FareService;
+import com.ridehub.rideservice.fare.utility.DistanceCalculator;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
 import lombok.RequiredArgsConstructor;
@@ -319,6 +320,11 @@ public class RideServiceImpl implements RideService {
     private double calculateDistance(
             RideRequest request) {
 
-        return 10.0;
+        return DistanceCalculator.calculateDistance(
+                request.getPickupLatitude(),
+                request.getPickupLongitude(),
+                request.getDropLatitude(),
+                request.getDropLongitude()
+        );
     }
 }
