@@ -18,4 +18,8 @@ public interface RideService {
             String token);
 
     List<RideResponse> getMyRides(Long riderId);
+
+    RideResponse arriveAtPickup(
+            Long rideId,
+            String token);
 }

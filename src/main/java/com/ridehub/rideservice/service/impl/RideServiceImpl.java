@@ -10,6 +10,7 @@ import com.ridehub.rideservice.entity.Ride;
 import com.ridehub.rideservice.enums.PaymentStatus;
 import com.ridehub.rideservice.enums.RideStatus;
 import com.ridehub.rideservice.exception.BadRequestException;
+import com.ridehub.rideservice.exception.BusinessRuleViolationException;
 import com.ridehub.rideservice.exception.ResourceNotFoundException;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -155,6 +157,33 @@ public class RideServiceImpl implements RideService {
         return rides.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public RideResponse arriveAtPickup(Long rideId, String token) {
+
+        log.info("Driver arrival requested for rideId: {}", rideId);
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ride not found."));
+
+        if(ride.getRideStatus() != RideStatus.DRIVER_ASSIGNED) {
+            throw new BadRequestException("Driver has not been assigned to this ride.");
+        }
+
+        DriverResponse driver = driverClient.getDriverProfile(token);
+
+        if (!driver.getUserId().equals(ride.getDriverId())) {
+            throw new BusinessRuleViolationException(
+                    "You are not assigned to this ride.");
+        }
+
+        ride.setRideStatus(RideStatus.DRIVER_ARRIVED);
+        Ride updatedRide = rideRepository.save(ride);
+
+        log.info("Driver arrived at pickup. Ride ID: {}", updatedRide.getId());
+
+        return mapToResponse(updatedRide);
     }
 
     private RideResponse mapToResponse(Ride ride) {

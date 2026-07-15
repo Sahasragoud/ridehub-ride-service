@@ -87,4 +87,17 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{rideId}/arrive")
+    public ResponseEntity<RideResponse> arriveAtPickup(
+            @PathVariable Long rideId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        RideResponse response =
+                rideService.arriveAtPickup(
+                        rideId,
+                        authHeader);
+
+        return ResponseEntity.ok(response);
+    }
 }
