@@ -10,4 +10,8 @@ public interface RideService {
     RideResponse getRideById(Long rideId);
 
     RideResponse cancelRide(Long riderId, Long rideId);
+
+    RideResponse acceptRide(
+            Long rideId,
+            String token);
 }

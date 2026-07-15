@@ -59,4 +59,16 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{rideId}/accept")
+    public ResponseEntity<RideResponse> acceptRide(
+            @PathVariable Long rideId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        RideResponse response = rideService.acceptRide(
+                rideId,
+                authHeader);
+
+        return ResponseEntity.ok(response);
+    }
 }

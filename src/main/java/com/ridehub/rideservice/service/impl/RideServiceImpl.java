@@ -1,5 +1,9 @@
 package com.ridehub.rideservice.service.impl;
 
+import com.ridehub.rideservice.client.DriverClient;
+import com.ridehub.rideservice.client.dto.DriverResponse;
+import com.ridehub.rideservice.client.enums.AvailabilityStatus;
+import com.ridehub.rideservice.client.enums.DriverStatus;
 import com.ridehub.rideservice.dto.request.RideRequest;
 import com.ridehub.rideservice.dto.response.RideResponse;
 import com.ridehub.rideservice.entity.Ride;
@@ -14,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ import java.math.BigDecimal;
 public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
+    private final DriverClient driverClient;
 
     @Override
     public RideResponse requestRide(
@@ -98,6 +104,47 @@ public class RideServiceImpl implements RideService {
                 updatedRide.getId());
 
         return mapToResponse(updatedRide);
+    }
+
+    @Override
+    public RideResponse acceptRide(Long rideId, String token) {
+
+        log.info("Ride accept requested. Ride ID: {}", rideId);
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Ride not found."));
+
+        if (ride.getRideStatus() != RideStatus.REQUESTED) {
+
+            throw new BadRequestException(
+                    "Ride has already been accepted.");
+        }
+
+        DriverResponse driver =
+                driverClient.getDriverProfile(token);
+
+        if (driver.getStatus() != DriverStatus.APPROVED) {
+
+            throw new BadRequestException(
+                    "Driver is not approved.");
+        }
+
+        if (driver.getAvailability() != AvailabilityStatus.ONLINE) {
+
+            throw new BadRequestException(
+                    "Driver must be online to accept rides.");
+        }
+
+        ride.setDriverId(driver.getUserId());
+        ride.setRideStatus(RideStatus.DRIVER_ASSIGNED);
+        ride.setAcceptedAt(LocalDateTime.now());
+
+        Ride savedRide = rideRepository.save(ride);
+
+        return mapToResponse(savedRide);
+
     }
 
     private RideResponse mapToResponse(Ride ride) {

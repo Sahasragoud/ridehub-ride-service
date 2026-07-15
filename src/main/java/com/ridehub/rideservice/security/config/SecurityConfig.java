@@ -36,7 +36,6 @@ public class SecurityConfig {
                                 "/api/test/public"
                         )
                         .permitAll()
-
                         .anyRequest()
                         .authenticated()
                 )
