@@ -2,6 +2,7 @@ package com.ridehub.rideservice.coupon.controller;
 
 import com.ridehub.rideservice.coupon.dto.request.CouponRequest;
 import com.ridehub.rideservice.coupon.dto.response.CouponResponse;
+import com.ridehub.rideservice.coupon.dto.response.CouponValidationResponse;
 import com.ridehub.rideservice.coupon.service.CouponService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -49,6 +51,18 @@ public class CouponController {
 
         return ResponseEntity.ok(
                 couponService.deactivateCoupon(id)
+        );
+    }
+
+    @PostMapping("/apply")
+    public ResponseEntity<CouponValidationResponse> applyCoupon(
+
+            @RequestParam String code,
+
+            @RequestParam BigDecimal fare) {
+
+        return ResponseEntity.ok(
+                couponService.applyCoupon(code, fare)
         );
     }
 }

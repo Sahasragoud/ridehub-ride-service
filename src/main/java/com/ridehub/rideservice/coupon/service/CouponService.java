@@ -2,7 +2,9 @@ package com.ridehub.rideservice.coupon.service;
 
 import com.ridehub.rideservice.coupon.dto.request.CouponRequest;
 import com.ridehub.rideservice.coupon.dto.response.CouponResponse;
+import com.ridehub.rideservice.coupon.dto.response.CouponValidationResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface CouponService {
@@ -15,4 +17,7 @@ public interface CouponService {
 
     CouponResponse deactivateCoupon(Long id);
 
+    CouponValidationResponse applyCoupon(
+            String couponCode,
+            BigDecimal rideFare);
 }
