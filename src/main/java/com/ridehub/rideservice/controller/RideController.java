@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/rides")
 @RequiredArgsConstructor
@@ -68,6 +70,20 @@ public class RideController {
         RideResponse response = rideService.acceptRide(
                 rideId,
                 authHeader);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-rides")
+    public ResponseEntity<List<RideResponse>> getMyRides(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+
+        Long riderId = jwtService.extractUserId(token);
+
+        List<RideResponse> response =
+                rideService.getMyRides(riderId);
 
         return ResponseEntity.ok(response);
     }

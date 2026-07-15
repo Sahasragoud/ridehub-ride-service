@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -142,7 +143,18 @@ public class RideServiceImpl implements RideService {
         Ride savedRide = rideRepository.save(ride);
 
         return mapToResponse(savedRide);
+    }
 
+    @Override
+    public List<RideResponse> getMyRides(Long riderId) {
+
+        log.info("Fetching rides for riderId: {}", riderId);
+
+        List<Ride> rides = rideRepository.findByRiderId(riderId);
+
+        return rides.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private RideResponse mapToResponse(Ride ride) {
