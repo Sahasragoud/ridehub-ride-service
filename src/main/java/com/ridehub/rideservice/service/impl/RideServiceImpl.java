@@ -4,6 +4,8 @@ import com.ridehub.rideservice.client.DriverClient;
 import com.ridehub.rideservice.client.dto.DriverResponse;
 import com.ridehub.rideservice.client.enums.AvailabilityStatus;
 import com.ridehub.rideservice.client.enums.DriverStatus;
+import com.ridehub.rideservice.coupon.dto.response.CouponValidationResponse;
+import com.ridehub.rideservice.coupon.service.CouponService;
 import com.ridehub.rideservice.dto.request.RideRequest;
 import com.ridehub.rideservice.dto.response.RideResponse;
 import com.ridehub.rideservice.entity.Ride;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +36,7 @@ public class RideServiceImpl implements RideService {
     private final RideRepository rideRepository;
     private final DriverClient driverClient;
     private final FareService fareService;
-    private FareBreakdownResponse fareBreakdown;
+    private final CouponService couponService;
 
     @Override
     public RideResponse requestRide(
@@ -47,8 +50,25 @@ public class RideServiceImpl implements RideService {
         FareBreakdown fare =
                 fareService.calculateEstimatedFare(
                         distanceKm,
-                        request.getRideType()
-                );
+                        request.getRideType());
+
+        BigDecimal finalFare = fare.getTotalFare();
+
+        BigDecimal discount = BigDecimal.ZERO;
+
+        if (request.getCouponCode() != null &&
+                !request.getCouponCode().isBlank()) {
+
+            CouponValidationResponse response =
+                    couponService.applyCoupon(
+                            request.getCouponCode(),
+                            finalFare);
+
+            finalFare = response.getFinalFare();
+
+            discount = response.getDiscount();
+
+        }
 
         Ride ride = Ride.builder()
                 .riderId(riderId)
@@ -61,14 +81,14 @@ public class RideServiceImpl implements RideService {
                 .rideType(request.getRideType())
                 .rideStatus(RideStatus.REQUESTED)
                 .paymentStatus(PaymentStatus.PENDING)
-                .estimatedFare(fare.getTotalFare())
+                .estimatedFare(finalFare)
+                .couponCode(request.getCouponCode())
+                .discountApplied(discount)
                 .build();
 
         Ride savedRide = rideRepository.save(ride);
 
         log.info("Ride created successfully. Ride ID: {}", savedRide.getId());
-
-        RideResponse response = mapToResponse(savedRide);
 
         return mapToResponse(savedRide, fare);
     }
@@ -278,6 +298,7 @@ public class RideServiceImpl implements RideService {
                 .acceptedAt(ride.getAcceptedAt())
                 .startedAt(ride.getStartedAt())
                 .completedAt(ride.getCompletedAt())
+
                 .build();
     }
 
@@ -311,6 +332,8 @@ public class RideServiceImpl implements RideService {
                 .rideType(ride.getRideType())
                 .paymentStatus(ride.getPaymentStatus())
                 .estimatedFare(ride.getEstimatedFare())
+                .couponCode(ride.getCouponCode())
+                .discountApplied(ride.getDiscountApplied())
                 .actualFare(ride.getActualFare())
                 .requestedAt(ride.getRequestedAt())
                 .acceptedAt(ride.getAcceptedAt())

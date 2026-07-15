@@ -63,6 +63,12 @@ public class Ride {
     @Column(precision = 10, scale = 2)
     private BigDecimal actualFare;
 
+    @Column
+    private String couponCode;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal discountApplied;
+
     private LocalDateTime requestedAt;
 
     private LocalDateTime acceptedAt;

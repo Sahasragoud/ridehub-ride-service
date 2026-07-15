@@ -51,4 +51,10 @@ public class RideResponse {
     private LocalDateTime completedAt;
 
     private FareBreakdownResponse fareBreakdown;
+
+    private String couponCode;
+
+    private BigDecimal discountApplied;
+
+    private BigDecimal finalEstimatedFare;
 }

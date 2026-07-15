@@ -40,4 +40,6 @@ public class RideRequest {
 
     @NotNull(message = "Ride type is required.")
     private RideType rideType;
+
+    private String couponCode;
 }
