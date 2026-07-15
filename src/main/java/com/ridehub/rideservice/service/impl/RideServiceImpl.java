@@ -86,14 +86,12 @@ public class RideServiceImpl implements RideService {
                     "You can only cancel your own ride.");
         }
 
-        if (ride.getRideStatus() == RideStatus.COMPLETED) {
-            throw new BadRequestException(
-                    "Completed ride cannot be cancelled.");
-        }
+        if (ride.getRideStatus() == RideStatus.IN_PROGRESS
+                || ride.getRideStatus() == RideStatus.COMPLETED
+                || ride.getRideStatus() == RideStatus.CANCELLED) {
 
-        if (ride.getRideStatus() == RideStatus.CANCELLED) {
             throw new BadRequestException(
-                    "Ride is already cancelled.");
+                    "Ride cannot be cancelled.");
         }
 
         ride.setRideStatus(RideStatus.CANCELLED);

@@ -14,4 +14,6 @@ public interface RideService {
     RideResponse acceptRide(
             Long rideId,
             String token);
+
+
 }
