@@ -12,9 +12,9 @@ import com.ridehub.rideservice.enums.RideStatus;
 import com.ridehub.rideservice.exception.BadRequestException;
 import com.ridehub.rideservice.exception.BusinessRuleViolationException;
 import com.ridehub.rideservice.exception.ResourceNotFoundException;
-import com.ridehub.rideservice.fare.FareBreakdown;
+import com.ridehub.rideservice.fare.constant.FareBreakdown;
 import com.ridehub.rideservice.fare.dto.FareBreakdownResponse;
-import com.ridehub.rideservice.fare.FareService;
+import com.ridehub.rideservice.fare.service.FareService;
 import com.ridehub.rideservice.fare.utility.DistanceCalculator;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
@@ -45,7 +45,10 @@ public class RideServiceImpl implements RideService {
         double distanceKm = calculateDistance(request);
 
         FareBreakdown fare =
-                fareService.calculateEstimatedFare(distanceKm);
+                fareService.calculateEstimatedFare(
+                        distanceKm,
+                        request.getRideType()
+                );
 
         Ride ride = Ride.builder()
                 .riderId(riderId)

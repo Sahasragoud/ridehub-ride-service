@@ -1,4 +1,4 @@
-package com.ridehub.rideservice.fare;
+package com.ridehub.rideservice.fare.constant;
 
 import lombok.Builder;
 import lombok.Getter;
