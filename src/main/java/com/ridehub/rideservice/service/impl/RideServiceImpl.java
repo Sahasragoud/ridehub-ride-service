@@ -12,6 +12,8 @@ import com.ridehub.rideservice.enums.RideStatus;
 import com.ridehub.rideservice.exception.BadRequestException;
 import com.ridehub.rideservice.exception.BusinessRuleViolationException;
 import com.ridehub.rideservice.exception.ResourceNotFoundException;
+import com.ridehub.rideservice.fare.FareBreakdown;
+import com.ridehub.rideservice.fare.FareService;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class RideServiceImpl implements RideService {
 
     private final RideRepository rideRepository;
     private final DriverClient driverClient;
+    private final FareService fareService;
 
     @Override
     public RideResponse requestRide(
@@ -37,6 +40,11 @@ public class RideServiceImpl implements RideService {
             RideRequest request) {
 
         log.info("Ride request received from riderId: {}", riderId);
+
+        double distanceKm = calculateDistance(request);
+
+        FareBreakdown fare =
+                fareService.calculateEstimatedFare(distanceKm);
 
         Ride ride = Ride.builder()
                 .riderId(riderId)
@@ -49,7 +57,7 @@ public class RideServiceImpl implements RideService {
                 .rideType(request.getRideType())
                 .rideStatus(RideStatus.REQUESTED)
                 .paymentStatus(PaymentStatus.PENDING)
-                .estimatedFare(BigDecimal.ZERO)
+                .estimatedFare(fare.getTotalFare())
                 .build();
 
         Ride savedRide = rideRepository.save(ride);
@@ -265,5 +273,11 @@ public class RideServiceImpl implements RideService {
                 .startedAt(ride.getStartedAt())
                 .completedAt(ride.getCompletedAt())
                 .build();
+    }
+
+    private double calculateDistance(
+            RideRequest request) {
+
+        return 10.0;
     }
 }
