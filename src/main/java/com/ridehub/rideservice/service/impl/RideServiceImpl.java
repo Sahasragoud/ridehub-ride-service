@@ -186,6 +186,37 @@ public class RideServiceImpl implements RideService {
         return mapToResponse(updatedRide);
     }
 
+    @Override
+    public RideResponse startRide(Long rideId, String token) {
+        log.info("Ride start requested. Ride ID: {}", rideId);
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Ride not found."));
+
+        if (ride.getRideStatus() != RideStatus.DRIVER_ARRIVED) {
+            throw new BadRequestException(
+                    "Driver has not arrived at pickup.");
+        }
+
+        DriverResponse driver =
+                driverClient.getDriverProfile(token);
+
+        if (!driver.getUserId().equals(ride.getDriverId())) {
+            throw new BusinessRuleViolationException(
+                    "You are not assigned to this ride.");
+        }
+
+        ride.setRideStatus(RideStatus.IN_PROGRESS);
+        ride.setStartedAt(LocalDateTime.now());
+
+        Ride updatedRide = rideRepository.save(ride);
+
+        log.info("Ride started successfully. Ride ID: {}", updatedRide.getId());
+        return mapToResponse(updatedRide);
+    }
+
     private RideResponse mapToResponse(Ride ride) {
 
         return RideResponse.builder()

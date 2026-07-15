@@ -22,4 +22,6 @@ public interface RideService {
     RideResponse arriveAtPickup(
             Long rideId,
             String token);
+
+    RideResponse startRide(Long rideId, String token);
 }

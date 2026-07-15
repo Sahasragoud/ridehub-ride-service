@@ -100,4 +100,17 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{rideId}/start")
+    public ResponseEntity<RideResponse> startRide(
+            @PathVariable Long rideId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        RideResponse response =
+                rideService.startRide(
+                        rideId,
+                        authHeader);
+
+        return ResponseEntity.ok(response);
+    }
 }
