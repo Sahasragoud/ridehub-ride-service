@@ -13,6 +13,7 @@ import com.ridehub.rideservice.exception.BadRequestException;
 import com.ridehub.rideservice.exception.BusinessRuleViolationException;
 import com.ridehub.rideservice.exception.ResourceNotFoundException;
 import com.ridehub.rideservice.fare.FareBreakdown;
+import com.ridehub.rideservice.fare.dto.FareBreakdownResponse;
 import com.ridehub.rideservice.fare.FareService;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
@@ -20,10 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +32,7 @@ public class RideServiceImpl implements RideService {
     private final RideRepository rideRepository;
     private final DriverClient driverClient;
     private final FareService fareService;
+    private FareBreakdownResponse fareBreakdown;
 
     @Override
     public RideResponse requestRide(
@@ -64,7 +64,9 @@ public class RideServiceImpl implements RideService {
 
         log.info("Ride created successfully. Ride ID: {}", savedRide.getId());
 
-        return mapToResponse(savedRide);
+        RideResponse response = mapToResponse(savedRide);
+
+        return mapToResponse(savedRide, fare);
     }
 
     @Override
@@ -272,6 +274,45 @@ public class RideServiceImpl implements RideService {
                 .acceptedAt(ride.getAcceptedAt())
                 .startedAt(ride.getStartedAt())
                 .completedAt(ride.getCompletedAt())
+                .build();
+    }
+
+    private FareBreakdownResponse mapFareBreakdown(
+            FareBreakdown fare) {
+
+        return FareBreakdownResponse.builder()
+                .baseFare(fare.getBaseFare())
+                .distanceFare(fare.getDistanceFare())
+                .bookingFee(fare.getBookingFee())
+                .gst(fare.getGst())
+                .totalFare(fare.getTotalFare())
+                .build();
+    }
+
+    private RideResponse mapToResponse(
+            Ride ride,
+            FareBreakdown fare) {
+
+        return RideResponse.builder()
+                .id(ride.getId())
+                .riderId(ride.getRiderId())
+                .driverId(ride.getDriverId())
+                .pickupLatitude(ride.getPickupLatitude())
+                .pickupLongitude(ride.getPickupLongitude())
+                .dropLatitude(ride.getDropLatitude())
+                .dropLongitude(ride.getDropLongitude())
+                .pickupAddress(ride.getPickupAddress())
+                .dropAddress(ride.getDropAddress())
+                .rideStatus(ride.getRideStatus())
+                .rideType(ride.getRideType())
+                .paymentStatus(ride.getPaymentStatus())
+                .estimatedFare(ride.getEstimatedFare())
+                .actualFare(ride.getActualFare())
+                .requestedAt(ride.getRequestedAt())
+                .acceptedAt(ride.getAcceptedAt())
+                .startedAt(ride.getStartedAt())
+                .completedAt(ride.getCompletedAt())
+                .fareBreakdown(mapFareBreakdown(fare))
                 .build();
     }
 

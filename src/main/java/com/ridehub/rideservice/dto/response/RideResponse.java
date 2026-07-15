@@ -3,6 +3,7 @@ package com.ridehub.rideservice.dto.response;
 import com.ridehub.rideservice.enums.PaymentStatus;
 import com.ridehub.rideservice.enums.RideStatus;
 import com.ridehub.rideservice.enums.RideType;
+import com.ridehub.rideservice.fare.dto.FareBreakdownResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -48,4 +49,6 @@ public class RideResponse {
     private LocalDateTime startedAt;
 
     private LocalDateTime completedAt;
+
+    private FareBreakdownResponse fareBreakdown;
 }
