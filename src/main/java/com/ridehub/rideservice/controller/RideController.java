@@ -113,4 +113,17 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{rideId}/complete")
+    public ResponseEntity<RideResponse> completeRide(
+            @PathVariable Long rideId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        RideResponse response =
+                rideService.completeRide(
+                        rideId,
+                        authHeader);
+
+        return ResponseEntity.ok(response);
+    }
 }

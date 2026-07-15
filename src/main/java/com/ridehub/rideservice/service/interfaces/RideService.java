@@ -24,4 +24,6 @@ public interface RideService {
             String token);
 
     RideResponse startRide(Long rideId, String token);
+
+    RideResponse completeRide(Long rideId, String token);
 }
