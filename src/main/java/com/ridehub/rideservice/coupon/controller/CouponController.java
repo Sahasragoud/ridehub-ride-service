@@ -54,15 +54,17 @@ public class CouponController {
         );
     }
 
-    @PostMapping("/apply")
+    @PostMapping("/apply/{id}")
     public ResponseEntity<CouponValidationResponse> applyCoupon(
+
+            @PathVariable Long id,
 
             @RequestParam String code,
 
             @RequestParam BigDecimal fare) {
 
         return ResponseEntity.ok(
-                couponService.applyCoupon(code, fare)
+                couponService.applyCoupon(id, code, fare)
         );
     }
 }

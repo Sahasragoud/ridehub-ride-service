@@ -4,10 +4,13 @@ import com.ridehub.rideservice.coupon.dto.request.CouponRequest;
 import com.ridehub.rideservice.coupon.dto.response.CouponResponse;
 import com.ridehub.rideservice.coupon.dto.response.CouponValidationResponse;
 import com.ridehub.rideservice.coupon.entity.Coupon;
+import com.ridehub.rideservice.coupon.entity.CouponUsage;
 import com.ridehub.rideservice.coupon.enums.CouponType;
 import com.ridehub.rideservice.coupon.repository.CouponRepository;
+import com.ridehub.rideservice.coupon.repository.CouponUsageRepository;
 import com.ridehub.rideservice.coupon.service.CouponService;
 import com.ridehub.rideservice.exception.BadRequestException;
+import com.ridehub.rideservice.exception.BusinessRuleViolationException;
 import com.ridehub.rideservice.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.List;
 public class CouponServiceImpl implements CouponService {
 
     private final CouponRepository repository;
+    private final CouponUsageRepository usageRepository;
 
     @Override
     public CouponResponse createCoupon(CouponRequest request) {
@@ -33,6 +37,9 @@ public class CouponServiceImpl implements CouponService {
                 .maximumDiscount(request.getMaximumDiscount())
                 .expiryDate(request.getExpiryDate())
                 .active(true)
+                .oneTimeUse(
+                        Boolean.TRUE.equals(request.getOneTimeUse())
+                )
                 .build();
 
         return map(repository.save(coupon));
@@ -84,12 +91,20 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public CouponValidationResponse applyCoupon(
+            Long riderId,
             String couponCode,
             BigDecimal rideFare) {
+
 
         Coupon coupon = repository.findByCode(couponCode)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Coupon not found"));
+
+        if (coupon.getOneTimeUse() &&
+                usageRepository.existsByRiderIdAndCoupon(riderId, coupon)) {
+            throw new BusinessRuleViolationException(
+                    "Coupon has already been used.");
+        }
 
         if (!coupon.getActive()) {
             throw new BadRequestException("Coupon is inactive.");
@@ -127,6 +142,13 @@ public class CouponServiceImpl implements CouponService {
         if (finalFare.compareTo(BigDecimal.ZERO) < 0) {
             finalFare = BigDecimal.ZERO;
         }
+
+        CouponUsage usage = CouponUsage.builder()
+                .riderId(riderId)
+                .coupon(coupon)
+                .build();
+
+        usageRepository.save(usage);
 
         return CouponValidationResponse.builder()
                 .valid(true)

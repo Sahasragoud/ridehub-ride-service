@@ -40,6 +40,10 @@ public class Coupon {
     private Boolean active;
 
     @Column(nullable = false)
+    @Builder.Default
+    private Boolean oneTimeUse = false;
+
+    @Column(nullable = false)
     private LocalDateTime expiryDate;
 
     @Column(nullable =false)

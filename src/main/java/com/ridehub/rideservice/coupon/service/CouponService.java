@@ -18,6 +18,7 @@ public interface CouponService {
     CouponResponse deactivateCoupon(Long id);
 
     CouponValidationResponse applyCoupon(
+            Long riderId,
             String couponCode,
             BigDecimal rideFare);
 }

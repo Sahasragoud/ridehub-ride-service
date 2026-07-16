@@ -61,6 +61,7 @@ public class RideServiceImpl implements RideService {
 
             CouponValidationResponse response =
                     couponService.applyCoupon(
+                            riderId,
                             request.getCouponCode(),
                             finalFare);
 

@@ -33,4 +33,6 @@ public class CouponRequest {
     @NotNull
     private LocalDateTime expiryDate;
 
+    private Boolean oneTimeUse;
+
 }
