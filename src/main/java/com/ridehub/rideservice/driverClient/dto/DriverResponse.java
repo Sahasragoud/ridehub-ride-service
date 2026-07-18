@@ -1,7 +1,7 @@
-package com.ridehub.rideservice.client.dto;
+package com.ridehub.rideservice.driverClient.dto;
 
-import com.ridehub.rideservice.client.enums.AvailabilityStatus;
-import com.ridehub.rideservice.client.enums.DriverStatus;
+import com.ridehub.rideservice.driverClient.enums.AvailabilityStatus;
+import com.ridehub.rideservice.driverClient.enums.DriverStatus;
 import lombok.Getter;
 import lombok.Setter;
 

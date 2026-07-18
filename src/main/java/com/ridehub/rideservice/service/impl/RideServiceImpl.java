@@ -1,9 +1,9 @@
 package com.ridehub.rideservice.service.impl;
 
-import com.ridehub.rideservice.client.DriverClient;
-import com.ridehub.rideservice.client.dto.DriverResponse;
-import com.ridehub.rideservice.client.enums.AvailabilityStatus;
-import com.ridehub.rideservice.client.enums.DriverStatus;
+import com.ridehub.rideservice.driverClient.DriverClient;
+import com.ridehub.rideservice.driverClient.dto.DriverResponse;
+import com.ridehub.rideservice.driverClient.enums.AvailabilityStatus;
+import com.ridehub.rideservice.driverClient.enums.DriverStatus;
 import com.ridehub.rideservice.coupon.dto.response.CouponValidationResponse;
 import com.ridehub.rideservice.coupon.service.CouponService;
 import com.ridehub.rideservice.dto.request.RideRequest;

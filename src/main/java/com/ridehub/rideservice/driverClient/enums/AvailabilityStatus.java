@@ -1,4 +1,4 @@
-package com.ridehub.rideservice.client.enums;
+package com.ridehub.rideservice.driverClient.enums;
 
 public enum AvailabilityStatus {
     ONLINE,
