@@ -2,6 +2,7 @@ package com.ridehub.rideservice.service.interfaces;
 
 import com.ridehub.rideservice.dto.request.RideRequest;
 import com.ridehub.rideservice.dto.response.RideResponse;
+import com.ridehub.rideservice.enums.PaymentStatus;
 
 import java.util.List;
 
@@ -26,4 +27,9 @@ public interface RideService {
     RideResponse startRide(Long rideId, String token);
 
     RideResponse completeRide(Long rideId, String token);
+
+    RideResponse updatePaymentStatus(
+            Long rideId,
+            PaymentStatus paymentStatus
+    );
 }

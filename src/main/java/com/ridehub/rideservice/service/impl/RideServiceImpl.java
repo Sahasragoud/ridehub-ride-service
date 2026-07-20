@@ -18,8 +18,14 @@ import com.ridehub.rideservice.fare.constant.FareBreakdown;
 import com.ridehub.rideservice.fare.dto.FareBreakdownResponse;
 import com.ridehub.rideservice.fare.service.FareService;
 import com.ridehub.rideservice.fare.utility.DistanceCalculator;
+import com.ridehub.rideservice.paymentClient.PaymentClient;
+import com.ridehub.rideservice.paymentClient.dto.request.PaymentRequest;
+import com.ridehub.rideservice.paymentClient.dto.response.PaymentResponse;
+import com.ridehub.rideservice.paymentClient.enums.Currency;
+import com.ridehub.rideservice.paymentClient.enums.PaymentMethod;
 import com.ridehub.rideservice.repository.RideRepository;
 import com.ridehub.rideservice.service.interfaces.RideService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +43,7 @@ public class RideServiceImpl implements RideService {
     private final DriverClient driverClient;
     private final FareService fareService;
     private final CouponService couponService;
+    private final PaymentClient paymentClient;
 
     @Override
     public RideResponse requestRide(
@@ -83,6 +90,7 @@ public class RideServiceImpl implements RideService {
                 .rideStatus(RideStatus.REQUESTED)
                 .paymentStatus(PaymentStatus.PENDING)
                 .estimatedFare(finalFare)
+                .actualFare(finalFare)
                 .couponCode(request.getCouponCode())
                 .discountApplied(discount)
                 .build();
@@ -272,9 +280,72 @@ public class RideServiceImpl implements RideService {
 
         ride.setRideStatus(RideStatus.COMPLETED);
         ride.setCompletedAt(LocalDateTime.now());
+
+        log.info("Ride completed successfully. Ride ID: {}", ride.getId());
+
+        log.info("Ride requested for payment: {}", rideId);
+
+        PaymentRequest paymentRequest =
+                PaymentRequest.builder()
+                        .rideId(ride.getId())
+                        .payerId(ride.getRiderId())
+                        .amount(ride.getActualFare())
+                        .currency(Currency.INR)
+                        .paymentMethod(PaymentMethod.UPI)
+                        .build();
+
+        try {
+
+            PaymentResponse paymentResponse =
+                    paymentClient.createPayment(paymentRequest);
+
+            ride.setPaymentId(paymentResponse.getId());
+            ride.setTransactionId(paymentResponse.getTransactionId());
+            ride.setPaymentStatus(paymentResponse.getStatus());
+
+            rideRepository.save(ride);
+
+            log.info(
+                    "Payment created. Ride={}, Payment={}, Status={}",
+                    ride.getId(),
+                    paymentResponse.getId(),
+                    paymentResponse.getStatus()
+            );
+        }
+        catch (FeignException ex) {
+            log.error("Payment Service returned an error.", ex);
+
+            ride.setPaymentStatus(PaymentStatus.FAILED);
+        }
+        catch (Exception ex) {
+            log.error("Unexpected error while creating payment.", ex);
+
+            ride.setPaymentStatus(PaymentStatus.FAILED);
+        }
+
+        Ride updatedRide = rideRepository.save(ride);
+        return mapToResponse(updatedRide);
+    }
+
+    @Override
+    public RideResponse updatePaymentStatus(
+            Long rideId,
+            PaymentStatus paymentStatus) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Ride not found."));
+
+        ride.setPaymentStatus(paymentStatus);
+
         Ride updatedRide = rideRepository.save(ride);
 
-        log.info("Ride completed successfully. Ride ID: {}", updatedRide.getId());
+        log.info(
+                "Ride payment status updated. Ride={}, Status={}",
+                rideId,
+                paymentStatus
+        );
+
         return mapToResponse(updatedRide);
     }
 
@@ -299,7 +370,6 @@ public class RideServiceImpl implements RideService {
                 .acceptedAt(ride.getAcceptedAt())
                 .startedAt(ride.getStartedAt())
                 .completedAt(ride.getCompletedAt())
-
                 .build();
     }
 

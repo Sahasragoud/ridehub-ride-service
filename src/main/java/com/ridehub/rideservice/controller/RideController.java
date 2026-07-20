@@ -1,6 +1,7 @@
 package com.ridehub.rideservice.controller;
 
 import com.ridehub.rideservice.dto.request.RideRequest;
+import com.ridehub.rideservice.dto.request.UpdatePaymentStatusRequest;
 import com.ridehub.rideservice.dto.response.RideResponse;
 import com.ridehub.rideservice.security.service.JwtService;
 import com.ridehub.rideservice.service.interfaces.RideService;
@@ -126,4 +127,5 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
 }

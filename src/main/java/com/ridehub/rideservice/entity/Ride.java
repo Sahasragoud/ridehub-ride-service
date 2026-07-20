@@ -69,6 +69,10 @@ public class Ride {
     @Column(precision = 10, scale = 2)
     private BigDecimal discountApplied;
 
+    private Long paymentId;
+
+    private String transactionId;
+
     private LocalDateTime requestedAt;
 
     private LocalDateTime acceptedAt;

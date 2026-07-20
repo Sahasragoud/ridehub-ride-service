@@ -1,7 +1,7 @@
 package com.ridehub.rideservice.paymentClient.dto.response;
 
+import com.ridehub.rideservice.enums.PaymentStatus;
 import com.ridehub.rideservice.paymentClient.enums.PaymentMethod;
-import com.ridehub.rideservice.paymentClient.enums.PaymentStatus;
 import lombok.Getter;
 
 import java.math.BigDecimal;

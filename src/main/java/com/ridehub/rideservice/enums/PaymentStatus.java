@@ -2,7 +2,9 @@ package com.ridehub.rideservice.enums;
 
 public enum PaymentStatus {
     PENDING,
-    PAID,
+    PROCESSING,
+    SUCCESS,
     FAILED,
-    REFUNDED
+    REFUNDED,
+    CANCELLED
 }
